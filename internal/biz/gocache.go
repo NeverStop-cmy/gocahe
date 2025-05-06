@@ -67,12 +67,10 @@ func NewGoCacheUsecase(repo CacheRepo, logger log.Logger) *GoCacheUsecase {
 		log:    log.NewHelper(logger),
 	}
 
-	active := &CacheBuffer{
-		Data: make(map[string]CacheItem),
-	}
-
 	for i := range c.shards {
-		c.shards[i].active = active
+		c.shards[i].active = &CacheBuffer{
+			Data: make(map[string]CacheItem),
+		}
 	}
 
 	c.timeWheel = NewTimeWheel(60, time.Second, c)
@@ -89,14 +87,16 @@ func (c *GoCacheUsecase) Set(ctx context.Context, key, value string, ttl time.Du
 	shard := c.getShard(key)
 	shard.mu.Lock()
 	defer shard.mu.Unlock()
-
 	entry := CacheItem{
-		Value:     value,
-		ExpiresAt: time.Now().Add(ttl).Unix(),
+		Value: value,
 	}
+	if ttl > 0 {
+		entry.ExpiresAt = time.Now().Add(ttl).Unix()
+	}
+
 	shard.active.Data[key] = entry
 	c.timeWheel.Add(key, ttl)
-	_ = c.repo.Write(ctx, []interface{}{"SET", key, value, ttl})
+	_ = c.repo.Write(ctx, []interface{}{"SET", key, value, entry.ExpiresAt})
 	return nil
 }
 
@@ -170,18 +170,19 @@ func (c *GoCacheUsecase) loadFromDisk() {
 		if len(command) == 4 && command[0] == "SET" {
 			key := command[1].(string)
 			value := command[2].(string)
-			expiration := command[3].(time.Duration)
-			expiresAt := time.Now().Add(expiration)
-			if time.Now().Before(expiresAt) {
+			expiresAt := command[3].(int64)
+			//等于0是永不过期
+			if expiresAt == 0 || time.Now().Unix() < expiresAt {
 				shard := c.getShard(key)
 				shard.mu.Lock()
 				entry := CacheItem{
 					Value:     value,
-					ExpiresAt: time.Now().Add(expiration).Unix(),
+					ExpiresAt: expiresAt,
 				}
 				shard.active.Data[key] = entry
 				shard.mu.Unlock()
-				c.timeWheel.Add(key, expiration)
+				//todo 随机
+				c.timeWheel.Add(key, 0)
 			}
 		} else if len(command) == 2 && command[0] == "DEL" {
 			key := command[1].(string)
