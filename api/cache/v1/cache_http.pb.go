@@ -33,7 +33,7 @@ func RegisterCacheServiceHTTPServer(s *http.Server, srv CacheServiceHTTPServer) 
 	r := s.Route("/")
 	r.POST("/v1/cache/string/{key}", _CacheService_SetString0_HTTP_Handler(srv))
 	r.GET("/v1/cache/string/{key}", _CacheService_GetString0_HTTP_Handler(srv))
-	r.GET("/v1/cache/string/{key}", _CacheService_DelString0_HTTP_Handler(srv))
+	r.DELETE("/v1/cache/string/{key}", _CacheService_DelString0_HTTP_Handler(srv))
 }
 
 func _CacheService_SetString0_HTTP_Handler(srv CacheServiceHTTPServer) func(ctx http.Context) error {
@@ -125,7 +125,7 @@ func (c *CacheServiceHTTPClientImpl) DelString(ctx context.Context, in *DelStrin
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationCacheServiceDelString))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

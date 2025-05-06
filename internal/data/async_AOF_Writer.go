@@ -18,7 +18,9 @@ type AsyncAOFWriter struct {
 }
 
 func (aw *AsyncAOFWriter) init() {
-	gob.Register(time.Time{})
+	gob.Register(map[string]interface{}{})
+	gob.Register([]interface{}{})
+	gob.Register("")
 	gob.Register(time.Duration(0))
 }
 

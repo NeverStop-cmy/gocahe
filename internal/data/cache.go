@@ -1,12 +1,13 @@
 package data
 
 import (
-	"bufio"
 	"context"
 	"encoding/gob"
 	"github.com/go-kratos/kratos/v2/log"
 	"gocache-service/internal/biz"
+	"io"
 	"os"
+	"time"
 )
 
 type cacheRepo struct {
@@ -28,7 +29,15 @@ func NewCacheRepo(data *Data, logger log.Logger) biz.CacheRepo {
 	file, _ := os.OpenFile(defaultDataFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 	cacheR.aofWriter = NewAsyncAOFWriter(file, cacheR.log)
 	cacheR.file = file
+	cacheR.init()
 	return cacheR
+}
+
+func (r *cacheRepo) init() {
+	gob.Register(map[string]interface{}{})
+	gob.Register([]interface{}{})
+	gob.Register("")
+	gob.Register(time.Duration(0))
 }
 
 func (r *cacheRepo) GetFile(ctx context.Context) (*os.File, error) {
@@ -44,12 +53,14 @@ func (r *cacheRepo) Write(ctx context.Context, command []interface{}) error {
 // CleanupAOF 清理 AOF 文件中的过期记录
 func (r *cacheRepo) CleanupAOF(ctx context.Context, expiredKeys []string) error {
 	// 创建一个临时文件
+	dir, err := os.Getwd()
+	r.log.WithContext(ctx).Infof("CleanupAOF expiredKeys :%+v,dir:%s", expiredKeys, dir)
 	tempFile, err := os.CreateTemp("", "cache-aof-temp-*.tmp")
 	if err != nil {
+		r.log.WithContext(ctx).Errorf("CreateTemp err:%v", err)
 		return err
 	}
 	defer tempFile.Close()
-
 	// 标记过期键
 	expiredKeySet := make(map[string]bool)
 	for _, key := range expiredKeys {
@@ -61,14 +72,16 @@ func (r *cacheRepo) CleanupAOF(ctx context.Context, expiredKeys []string) error 
 	if err != nil {
 		return err
 	}
-	scanner := bufio.NewScanner(r.file)
 	decoder := gob.NewDecoder(r.file)
 	encoder := gob.NewEncoder(tempFile)
-
-	for scanner.Scan() {
+	for {
 		var command []interface{}
-		err := decoder.Decode(&command)
+		err = decoder.Decode(&command)
 		if err != nil {
+			r.log.WithContext(ctx).Errorf("CleanupAOF Decode err:%v", err)
+			if err == io.EOF {
+				break
+			}
 			return err
 		}
 		if len(command) == 4 && command[0] == "SET" {
@@ -103,7 +116,7 @@ func (r *cacheRepo) CleanupAOF(ctx context.Context, expiredKeys []string) error 
 		return err
 	}
 	// 将临时文件重命名为原文件
-	err = os.Rename(tempFile.Name(), r.file.Name())
+	err = os.Rename(tempFile.Name(), defaultDataFile)
 	if err != nil {
 		return err
 	}

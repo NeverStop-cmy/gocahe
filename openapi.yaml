@@ -29,7 +29,7 @@ paths:
         get:
             tags:
                 - CacheService
-            operationId: CacheService_DelString
+            operationId: CacheService_GetString
             parameters:
                 - name: key
                   in: path
@@ -42,7 +42,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/cache.v1.DelStringResponse'
+                                $ref: '#/components/schemas/cache.v1.GetStringResponse'
         post:
             tags:
                 - CacheService
@@ -66,6 +66,23 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/cache.v1.SetStringResponse'
+        delete:
+            tags:
+                - CacheService
+            operationId: CacheService_DelString
+            parameters:
+                - name: key
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/cache.v1.DelStringResponse'
 components:
     schemas:
         cache.v1.DelStringResponse:

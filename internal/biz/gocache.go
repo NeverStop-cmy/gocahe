@@ -154,7 +154,9 @@ func (c *GoCacheUsecase) loadFromDisk() {
 	defer file.Close()
 
 	decoder := gob.NewDecoder(file)
-	c.log.WithContext(ctx).Infof("loadFromDisk start!")
+
+	dir, err := os.Getwd()
+	c.log.WithContext(ctx).Infof("loadFromDisk start!dir:%s", dir)
 	for {
 		var command []interface{}
 		err = decoder.Decode(&command)
@@ -199,11 +201,14 @@ func (c *GoCacheUsecase) startExpirationChecker() {
 		select {
 		case <-c.ticker.C:
 			expiredKeys := c.collectExpiredKeys()
-			c.cleanupMemory(expiredKeys)
-			err := c.repo.CleanupAOF(context.Background(), expiredKeys)
-			if err != nil {
-
+			if len(expiredKeys) > 0 {
+				c.cleanupMemory(expiredKeys)
+				err := c.repo.CleanupAOF(context.Background(), expiredKeys)
+				if err != nil {
+					c.log.WithContext(context.Background()).Errorf("cleanup CleanupAOF err: %v", err)
+				}
 			}
+
 		case <-c.stop:
 			c.ticker.Stop()
 			c.timeWheel.Close()

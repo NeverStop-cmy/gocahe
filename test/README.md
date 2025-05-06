@@ -3,4 +3,5 @@ curl -X POST "http://localhost:8000/v1/cache/string/test_key" -H "Content-Type: 
 
 curl http://localhost:8000/v1/cache/string/test_key
 
+curl -X DELETE "http://localhost:8000/v1/cache/string/test_key" 
 

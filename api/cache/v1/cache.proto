@@ -22,7 +22,7 @@ service CacheService {
 
   rpc DelString (DelStringRequest) returns (DelStringResponse) {
     option (google.api.http) = {
-      get: "/v1/cache/string/{key}"
+      delete: "/v1/cache/string/{key}"
     };
   }
 }

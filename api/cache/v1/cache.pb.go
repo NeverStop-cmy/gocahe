@@ -307,7 +307,7 @@ const file_cache_v1_cache_proto_rawDesc = "" +
 	"\fCacheService\x12g\n" +
 	"\tSetString\x12\x1a.cache.v1.SetStringRequest\x1a\x1b.cache.v1.SetStringResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/cache/string/{key}\x12d\n" +
 	"\tGetString\x12\x1a.cache.v1.GetStringRequest\x1a\x1b.cache.v1.GetStringResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/cache/string/{key}\x12d\n" +
-	"\tDelString\x12\x1a.cache.v1.DelStringRequest\x1a\x1b.cache.v1.DelStringResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/cache/string/{key}B!Z\x1fgocache-service/api/cache/v1;v1b\x06proto3"
+	"\tDelString\x12\x1a.cache.v1.DelStringRequest\x1a\x1b.cache.v1.DelStringResponse\"\x1e\x82\xd3\xe4\x93\x02\x18*\x16/v1/cache/string/{key}B!Z\x1fgocache-service/api/cache/v1;v1b\x06proto3"
 
 var (
 	file_cache_v1_cache_proto_rawDescOnce sync.Once
