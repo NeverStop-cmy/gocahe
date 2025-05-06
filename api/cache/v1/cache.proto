@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package cache.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "gocache-service/api/cache/v1;v1";
+
+service CacheService {
+  rpc SetString (SetStringRequest) returns (SetStringResponse) {
+    option (google.api.http) = {
+      post: "/v1/cache/string/{key}"
+      body: "*"
+    };
+  }
+
+  rpc GetString (GetStringRequest) returns (GetStringResponse) {
+    option (google.api.http) = {
+      get: "/v1/cache/string/{key}"
+    };
+  }
+
+  rpc DelString (DelStringRequest) returns (DelStringResponse) {
+    option (google.api.http) = {
+      get: "/v1/cache/string/{key}"
+    };
+  }
+}
+
+message SetStringRequest {
+  string key = 1;
+  string value = 2;
+  int32 ttl_seconds = 3;
+}
+
+message SetStringResponse {}
+
+message GetStringRequest {
+  string key = 1;
+}
+
+message GetStringResponse {
+  string value = 1;
+}
+
+message DelStringRequest {
+  string key = 1;
+}
+
+message DelStringResponse {}

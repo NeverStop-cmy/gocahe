@@ -1,0 +1,101 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /helloworld/{name}:
+        get:
+            tags:
+                - Greeter
+            description: Sends a greeting
+            operationId: Greeter_SayHello
+            parameters:
+                - name: name
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /v1/cache/string/{key}:
+        get:
+            tags:
+                - CacheService
+            operationId: CacheService_DelString
+            parameters:
+                - name: key
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/cache.v1.DelStringResponse'
+        post:
+            tags:
+                - CacheService
+            operationId: CacheService_SetString
+            parameters:
+                - name: key
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/cache.v1.SetStringRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/cache.v1.SetStringResponse'
+components:
+    schemas:
+        cache.v1.DelStringResponse:
+            type: object
+            properties: {}
+        cache.v1.GetStringResponse:
+            type: object
+            properties:
+                value:
+                    type: string
+        cache.v1.SetStringRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+                value:
+                    type: string
+                ttlSeconds:
+                    type: integer
+                    format: int32
+        cache.v1.SetStringResponse:
+            type: object
+            properties: {}
+        helloworld.v1.HelloReply:
+            type: object
+            properties:
+                message:
+                    type: string
+            description: The response message containing the greetings
+tags:
+    - name: CacheService
+    - name: Greeter
+      description: The greeting service definition.
